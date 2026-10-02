@@ -1,0 +1,55 @@
+{
+  "name": "Better Trees",
+  "author": "DeadSigma",
+  "description": "Turns decorative trees, props into usable resources. Chop, loot, dismantle — even what used to be just decoration.",
+  "version": "1.4.0", 
+  "license": "",
+  "icon": "icon.png",
+  "banner": "banner.jpg",
+  "gameVersion": "1.0",
+  "requiredByAllPlayers": true,
+  "updateUrl": "https://www.raftmodding.com/api/v1/mods/better-trees/version.txt",
+  "isModPermanent": false,
+  "excludedFiles": [],
+  "modSettings": [
+    {
+      "type": "section",
+      "text": "Stone Axe",
+      "name": "stoneAxe"
+    },
+    {
+      "type": "input",
+      "text": "Hits to Break Tree",
+      "name": "HitsToBreak_StoneAxe",
+      "mode": "IntegerNumber",
+      "default": "5",
+      "section": "stoneAxe"
+    },
+    {
+      "type": "section",
+      "text": "Metal Axe",
+      "name": "metalAxe"
+    },
+    {
+      "type": "input",
+      "text": "Hits to Break Tree",
+      "name": "HitsToBreak_MetalAxe",
+      "mode": "IntegerNumber",
+      "default": "4",
+      "section": "metalAxe"
+    },
+    {
+      "type": "section",
+      "text": "Titanium Axe",
+      "name": "titaniumAxe"
+    },
+    {
+      "type": "input",
+      "text": "Hits to Break Tree",
+      "name": "HitsToBreak_TitaniumAxe",
+      "mode": "IntegerNumber",
+      "default": "3",
+      "section": "titaniumAxe"
+    }
+  ]
+}
