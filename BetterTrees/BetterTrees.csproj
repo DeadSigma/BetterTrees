@@ -14,6 +14,9 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 
+		<BeforePack>SetReleaseRmodMode;$(BeforePack)</BeforePack>
+
+
 		<RaftDir Condition="'$(RaftDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Raft</RaftDir>
 		<RmlDir Condition="'$(RmlDir)' == ''">$(APPDATA)\RaftModLoader</RmlDir>
 		<RmlBinariesDir>$(RmlDir)\binaries</RmlBinariesDir>
@@ -134,47 +137,89 @@
 		<Error Condition="!Exists('$(RaftDir)\Raft_Data\Managed\Unity.TextMeshPro.dll')" Text="Unity.TextMeshPro.dll не найден: $(RaftDir)\Raft_Data\Managed\Unity.TextMeshPro.dll" />
 	</Target>
 
-	<Target Name="BuildRmod" AfterTargets="Build">
+	<Target Name="SetReleaseRmodMode">
 		<PropertyGroup>
-			<ModName>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '"name"\s*:\s*"([^"]+)"').Groups[1].Value)</ModName>
-			<ModVersion>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '"version"\s*:\s*"([^"]+)"').Groups[1].Value)</ModVersion>
+			<RmodMode>Release</RmodMode>
+		</PropertyGroup>
+	</Target>
 
-			<RmodTempDir>$(BaseIntermediateOutputPath)rmod\</RmodTempDir>
-			<ReleaseDir>$(ProjectDir)..\releases\</ReleaseDir>
-			<RmodFile>$(ReleaseDir)$(ModName) v$(ModVersion).rmod</RmodFile>
-			<InstalledRmodFile>$(RaftModsDir)\$(ModName) v$(ModVersion).rmod</InstalledRmodFile>
-			<LegacyDevRmodFile>$(RaftModsDir)\BetterTrees.dev.rmod</LegacyDevRmodFile>
+	<Target Name="BuildDevRmod" AfterTargets="Build" Condition="'$(RmodMode)' != 'Release'">
+		<PropertyGroup>
+			<ModName>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '&quot;name&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</ModName>
+			<ModVersion>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</ModVersion>
+
+			<DevRmodTempDir>$(BaseIntermediateOutputPath)rmod-dev\</DevRmodTempDir>
+			<DevRmodFile>$(RaftModsDir)\$(ModName) v$(ModVersion) DEV.rmod</DevRmodFile>
+			<LegacyDevRmodFile>$(RaftModsDir)\$(AssemblyName).dev.rmod</LegacyDevRmodFile>
+			<LegacyUnversionedRmodFile>$(RaftModsDir)\$(ModName).rmod</LegacyUnversionedRmodFile>
 		</PropertyGroup>
 
 		<Error Condition="!Exists('$(ProjectDir)modinfo.json')" Text="modinfo.json не найден в корне проекта" />
 
-		<RemoveDir Directories="$(RmodTempDir)" Condition="Exists('$(RmodTempDir)')" />
-
-		<MakeDir Directories="$(RmodTempDir)" />
-		<MakeDir Directories="$(ReleaseDir)" />
+		<RemoveDir Directories="$(DevRmodTempDir)" Condition="Exists('$(DevRmodTempDir)')" />
+		<MakeDir Directories="$(DevRmodTempDir)" />
 		<MakeDir Directories="$(RaftModsDir)" Condition="!Exists('$(RaftModsDir)')" />
 
 		<ItemGroup>
-			<RmodFiles Include="$(ProjectDir)**\*" Exclude="$(ProjectDir)bin\**;$(ProjectDir)obj\**" />
+			<DevRmodFiles Include="$(ProjectDir)**\*" Exclude="$(ProjectDir)bin\**;$(ProjectDir)obj\**" />
+			<OldInstalledRmods Include="$(RaftModsDir)\$(ModName) v*.rmod" />
 		</ItemGroup>
 
-		<Copy SourceFiles="@(RmodFiles)" DestinationFiles="@(RmodFiles->'$(RmodTempDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+		<Copy SourceFiles="@(DevRmodFiles)"
+			  DestinationFiles="@(DevRmodFiles->'$(DevRmodTempDir)%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="false" />
 
-		<Delete Files="$(RmodFile)" Condition="Exists('$(RmodFile)')" />
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;$p = '$(DevRmodTempDir)modinfo.json'; if (!(Test-Path -LiteralPath $p)) { throw 'DEV modinfo.json не найден' }; $c = [IO.File]::ReadAllText($p); if ($c -notmatch 'isModPermanent\x22\s*:') { throw 'Поле isModPermanent не найдено в modinfo.json' }; $c = [regex]::Replace($c, '(isModPermanent\x22\s*:\s*)(true|false)', '${1}true', [Text.RegularExpressions.RegexOptions]::IgnoreCase); [IO.File]::WriteAllText($p, $c, [Text.UTF8Encoding]::new($false))&quot;" />
 
-		<ZipDirectory SourceDirectory="$(RmodTempDir)" DestinationFile="$(RmodFile)" Overwrite="true" />
-
-		<RemoveDir Directories="$(RmodTempDir)" />
-
-		<Delete Files="$(InstalledRmodFile)" Condition="Exists('$(InstalledRmodFile)')" />
-
+		<Delete Files="@(OldInstalledRmods)" />
 		<Delete Files="$(LegacyDevRmodFile)" Condition="Exists('$(LegacyDevRmodFile)')" />
+		<Delete Files="$(LegacyUnversionedRmodFile)" Condition="Exists('$(LegacyUnversionedRmodFile)')" />
 
-		<Copy SourceFiles="$(RmodFile)" DestinationFiles="$(InstalledRmodFile)" />
+		<ZipDirectory SourceDirectory="$(DevRmodTempDir)"
+					  DestinationFile="$(DevRmodFile)"
+					  Overwrite="true" />
 
-		<Message Importance="high" Text="Release RMod создан: $(RmodFile)" />
+		<RemoveDir Directories="$(DevRmodTempDir)" />
 
-		<Message Importance="high" Text="Release RMod установлен: $(InstalledRmodFile)" />
+		<Message Importance="high" Text="DEV RMod установлен: $(DevRmodFile)" />
+	</Target>
+
+	<Target Name="BuildReleaseRmod" AfterTargets="Pack">
+		<PropertyGroup>
+			<ModName>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '&quot;name&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</ModName>
+			<ModVersion>$([System.Text.RegularExpressions.Regex]::Match('$([System.IO.File]::ReadAllText("$(ProjectDir)modinfo.json"))', '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</ModVersion>
+
+			<ReleaseRmodTempDir>$(BaseIntermediateOutputPath)rmod-release\</ReleaseRmodTempDir>
+			<ReleaseDir>$(ProjectDir)..\releases\</ReleaseDir>
+			<ReleaseRmodFile>$(ReleaseDir)$(ModName) v$(ModVersion).rmod</ReleaseRmodFile>
+		</PropertyGroup>
+
+		<Error Condition="!Exists('$(ProjectDir)modinfo.json')" Text="modinfo.json не найден в корне проекта" />
+
+		<RemoveDir Directories="$(ReleaseRmodTempDir)" Condition="Exists('$(ReleaseRmodTempDir)')" />
+		<MakeDir Directories="$(ReleaseRmodTempDir)" />
+		<MakeDir Directories="$(ReleaseDir)" />
+
+		<ItemGroup>
+			<ReleaseRmodFiles Include="$(ProjectDir)**\*"
+							  Exclude="$(ProjectDir)bin\**;$(ProjectDir)obj\**;$(ProjectDir)**\DevAutoLoad.cs" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(ReleaseRmodFiles)"
+			  DestinationFiles="@(ReleaseRmodFiles->'$(ReleaseRmodTempDir)%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="false" />
+
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;$p = '$(ReleaseRmodTempDir)modinfo.json'; if (!(Test-Path -LiteralPath $p)) { throw 'Release modinfo.json не найден' }; $c = [IO.File]::ReadAllText($p); if ($c -notmatch 'isModPermanent\x22\s*:') { throw 'Поле isModPermanent не найдено в modinfo.json' }; $c = [regex]::Replace($c, '(isModPermanent\x22\s*:\s*)(true|false)', '${1}false', [Text.RegularExpressions.RegexOptions]::IgnoreCase); [IO.File]::WriteAllText($p, $c, [Text.UTF8Encoding]::new($false))&quot;" />
+
+		<Delete Files="$(ReleaseRmodFile)" Condition="Exists('$(ReleaseRmodFile)')" />
+
+		<ZipDirectory SourceDirectory="$(ReleaseRmodTempDir)"
+					  DestinationFile="$(ReleaseRmodFile)"
+					  Overwrite="true" />
+
+		<RemoveDir Directories="$(ReleaseRmodTempDir)" />
+
+		<Message Importance="high" Text="Release RMod создан: $(ReleaseRmodFile)" />
 	</Target>
 
 	<Target Name="LaunchRaftDev" AfterTargets="Rebuild">
