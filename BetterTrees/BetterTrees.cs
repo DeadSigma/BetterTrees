@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using HMLLibrary; 
+using HMLLibrary;
 
 
 namespace BetterTrees
@@ -191,8 +191,8 @@ namespace BetterTrees
         public static string StrawberryItemName = "Strawberry";
         public static string TurmericItemName = "Turmeric";
         public static string WatermelonItemName = "Watermelon";
-        public static string ReefHuts_PlasticWallItemName = "ReefHuts_PlasticWall";		
-        public static string ReefHuts_StickItemName = "ReefHuts_Stick";		
+        public static string ReefHuts_PlasticWallItemName = "ReefHuts_PlasticWall";
+        public static string ReefHuts_StickItemName = "ReefHuts_Stick";
         public static string Layer_Default = "Default";
         public static string Layer_Tree = "Tree";
         public static string Layer_Item = "Item";
@@ -305,13 +305,15 @@ namespace BetterTrees
             treeLayerId = LayerMask.NameToLayer(ChoppableTreesModConstants.Layer_Tree);
             itemLayerId = LayerMask.NameToLayer(ChoppableTreesModConstants.Layer_Item);
 
-            if (treeLayerId == -1) {
+            if (treeLayerId == -1)
+            {
                 treeLayerId = defaultLayerId;
-               // Debug.LogWarning($"{BetterTrees.Main.logPrefix} Layer '{ChoppableTreesModConstants.Layer_Tree}' not found, using default layer ({LayerMask.LayerToName(defaultLayerId)}) for colliders requiring '{ChoppableTreesModConstants.Layer_Tree}' layer.");
+                // Debug.LogWarning($"{BetterTrees.Main.logPrefix} Layer '{ChoppableTreesModConstants.Layer_Tree}' not found, using default layer ({LayerMask.LayerToName(defaultLayerId)}) for colliders requiring '{ChoppableTreesModConstants.Layer_Tree}' layer.");
             }
-            if (itemLayerId == -1) {
+            if (itemLayerId == -1)
+            {
                 itemLayerId = defaultLayerId;
-               // Debug.LogWarning($"{BetterTrees.Main.logPrefix} Layer '{ChoppableTreesModConstants.Layer_Item}' not found, using default layer ({LayerMask.LayerToName(defaultLayerId)}) for FL_Cloth and other pickups.");
+                // Debug.LogWarning($"{BetterTrees.Main.logPrefix} Layer '{ChoppableTreesModConstants.Layer_Item}' not found, using default layer ({LayerMask.LayerToName(defaultLayerId)}) for FL_Cloth and other pickups.");
             }
 
 
@@ -325,41 +327,50 @@ namespace BetterTrees
                 bool isGenerallyConsidered = choppableKeywords.Any(keyword => objectNameLower.Contains(keyword));
                 if (!isGenerallyConsidered) continue;
                 if (exclusionKeywords.Any(exKey => objectNameLower.Contains(exKey))) continue;
-                
+
                 LODGroup lodGroup = t.GetComponentInParent<LODGroup>();
                 if (lodGroup != null && lodGroup.gameObject != t.gameObject)
                 {
-                     Transform potentialRoot = t;
-                     while(potentialRoot.parent != null && (potentialRoot.name.ToLower().Contains("_lod") || potentialRoot.GetComponent<MeshRenderer>() == null))
-                     {
+                    Transform potentialRoot = t;
+                    while (potentialRoot.parent != null && (potentialRoot.name.ToLower().Contains("_lod") || potentialRoot.GetComponent<MeshRenderer>() == null))
+                    {
                         if (choppableKeywords.Any(keyword => potentialRoot.parent.name.ToLower().Contains(keyword)))
                         {
                             potentialRoot = potentialRoot.parent;
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
-                     }
-                     if (choppableKeywords.Any(keyword => potentialRoot.name.ToLower().Contains(keyword))) {
+                    }
+                    if (choppableKeywords.Any(keyword => potentialRoot.name.ToLower().Contains(keyword)))
+                    {
                         rootObject = potentialRoot.gameObject;
-                     } else {
+                    }
+                    else
+                    {
                         if (t.name.ToLower().Contains("_lod") || t.name.ToLower().Contains("_billboard")) continue;
-                     }
-                } else if (t.name.ToLower().Contains("_lod") || t.name.ToLower().Contains("_billboard")) {
+                    }
+                }
+                else if (t.name.ToLower().Contains("_lod") || t.name.ToLower().Contains("_billboard"))
+                {
                     bool partOfChoppable = false;
                     Transform currentParent = t.parent;
-                    while(currentParent != null) {
-                        if(choppableKeywords.Any(keyword => currentParent.name.ToLower().Contains(keyword))) {
+                    while (currentParent != null)
+                    {
+                        if (choppableKeywords.Any(keyword => currentParent.name.ToLower().Contains(keyword)))
+                        {
                             rootObject = currentParent.gameObject;
                             partOfChoppable = true;
                             break;
                         }
                         currentParent = currentParent.parent;
                     }
-                    if(!partOfChoppable) continue;
+                    if (!partOfChoppable) continue;
                 }
-                
+
                 if (rootObject.GetComponent<HarvestableTree>() != null ||
-                    processedObjects.Contains(rootObject)) 
+                    processedObjects.Contains(rootObject))
                 {
                     continue;
                 }
@@ -367,7 +378,7 @@ namespace BetterTrees
 
                 string rootObjectNameLower = rootObject.name.ToLower();
                 bool configured = false;
-                
+
                 var bestMatchConfigKey = objectConfigurators.Keys
                     .Where(key => rootObjectNameLower.Contains(key))
                     .OrderByDescending(key => key.Length)
@@ -379,16 +390,16 @@ namespace BetterTrees
                     configured = true;
                 }
 
-                if (configured) 
+                if (configured)
                 {
-                    if (!processedObjects.Contains(rootObject)) 
+                    if (!processedObjects.Contains(rootObject))
                     {
                         processedObjects.Add(rootObject);
                     }
                 }
             }
         }
-        
+
         static T CreateRuntimeAsset<T>(GameObject owner) where T : ScriptableObject
         {
             T asset = ScriptableObject.CreateInstance<T>();
@@ -397,58 +408,62 @@ namespace BetterTrees
 
         static void ConfigureFLCloth(GameObject rootObject, string nameLower)
         {
-           // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring FL_Cloth: {rootObject.name}"); 
-            
+            // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring FL_Cloth: {rootObject.name}"); 
+
             rootObject.tag = ChoppableTreesModConstants.Tag_Untagged;
-            rootObject.layer = Patch_Landmark_Initialize_Choppables.itemLayerId; 
-            
+            rootObject.layer = Patch_Landmark_Initialize_Choppables.itemLayerId;
+
             PickupItem pi = rootObject.GetOrAddComponent<PickupItem>();
             PickupItem_Networked pin = rootObject.GetOrAddComponent<PickupItem_Networked>();
             LandmarkItem_PickupItem lipi = rootObject.GetOrAddComponent<LandmarkItem_PickupItem>();
-            
+
             BoxCollider bc = rootObject.GetComponent<BoxCollider>();
-            if (bc == null) {
+            if (bc == null)
+            {
                 bc = rootObject.AddComponent<BoxCollider>();
             }
             bc.isTrigger = false;
 
             rootObject.GetOrAddComponent<RaycastInteractable>();
-            
+
             YieldHandler yh = rootObject.GetOrAddComponent<YieldHandler>();
             SO_ItemYield yieldAsset = CreateRuntimeAsset<SO_ItemYield>(rootObject);
             if (yieldAsset.yieldAssets == null) yieldAsset.yieldAssets = new List<Cost>();
             else yieldAsset.yieldAssets.Clear();
-            yh.yieldAsset = yieldAsset; 
+            yh.yieldAsset = yieldAsset;
             pi.yieldHandler = yh;
-            
+
             RandomDropper rd = rootObject.GetOrAddComponent<RandomDropper>();
             SO_RandomDropper dropperAsset = CreateRuntimeAsset<SO_RandomDropper>(rootObject);
             if (dropperAsset.randomizer == null) dropperAsset.randomizer = new Randomizer();
 
             Item_Base ropeItem = ItemManager.GetItemByName(ChoppableTreesModConstants.RopeItemName);
-            if (ropeItem != null) {
+            if (ropeItem != null)
+            {
                 List<RandomItem> randomItemList = new List<RandomItem> {
-                    new RandomItem { obj = ropeItem, weight = 90, spawnChance = "0.9" } 
+                    new RandomItem { obj = ropeItem, weight = 90, spawnChance = "0.9" }
                 };
                 dropperAsset.randomizer.items = randomItemList.ToArray();
-            } else {
-              //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureFLCloth: Item '{ChoppableTreesModConstants.RopeItemName}' not found for loot.");
+            }
+            else
+            {
+                //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureFLCloth: Item '{ChoppableTreesModConstants.RopeItemName}' not found for loot.");
                 dropperAsset.randomizer.items = System.Array.Empty<RandomItem>();
             }
-            Traverse.Create(rd).Field("amountOfItems").SetValue(new Interval_Int { minValue = 1, maxValue = 1 }); 
+            Traverse.Create(rd).Field("amountOfItems").SetValue(new Interval_Int { minValue = 1, maxValue = 1 });
             Traverse.Create(rd).Field("randomDropperAsset").SetValue(dropperAsset);
             pi.dropper = rd;
-            
+
             pi.pickupItemType = PickupItemType.Default;
             pi.canBePickedUp = true;
             pi.requiresHands = true;
             if (pi.itemInstance == null) pi.itemInstance = new ItemInstance();
-            pi.itemInstance.Uses = 1; 
-            
+            pi.itemInstance.Uses = 1;
+
             pi.networkID = pin;
-            
+
             SetupNetwork(pin, lipi);
-            
+
             //// Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured FL_Cloth: {rootObject.name} with Tag: {rootObject.tag}, Layer: {LayerMask.LayerToName(rootObject.layer)}");
         }
 
@@ -457,7 +472,7 @@ namespace BetterTrees
             // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring PickupLootObject '{objConfigName}': {rootObject.name}");
 
             rootObject.tag = ChoppableTreesModConstants.Tag_Untagged;
-            rootObject.layer = Patch_Landmark_Initialize_Choppables.itemLayerId; 
+            rootObject.layer = Patch_Landmark_Initialize_Choppables.itemLayerId;
 
             PickupItem pi = rootObject.GetOrAddComponent<PickupItem>();
             PickupItem_Networked pin = rootObject.GetOrAddComponent<PickupItem_Networked>();
@@ -467,14 +482,18 @@ namespace BetterTrees
             if (bc == null)
             {
                 Collider existingCollider = rootObject.GetComponent<Collider>();
-                if (existingCollider == null) {
+                if (existingCollider == null)
+                {
                     bc = rootObject.AddComponent<BoxCollider>();
-                } else {
-                     existingCollider.isTrigger = false; 
+                }
+                else
+                {
+                    existingCollider.isTrigger = false;
                 }
             }
-            if (bc != null) { 
-                 bc.isTrigger = false;
+            if (bc != null)
+            {
+                bc.isTrigger = false;
             }
 
             rootObject.GetOrAddComponent<RaycastInteractable>();
@@ -494,7 +513,7 @@ namespace BetterTrees
             if (lootItem != null)
             {
                 List<RandomItem> randomItemList = new List<RandomItem> {
-                    new RandomItem { obj = lootItem, weight = 100, spawnChance = itemChanceStr } 
+                    new RandomItem { obj = lootItem, weight = 100, spawnChance = itemChanceStr }
                 };
                 dropperAsset.randomizer.items = randomItemList.ToArray();
             }
@@ -503,15 +522,15 @@ namespace BetterTrees
                 // Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigurePickupLootObject '{objConfigName}': Item '{lootItemNameConst}' not found for loot on {rootObject.name}.");
                 dropperAsset.randomizer.items = System.Array.Empty<RandomItem>();
             }
-            Traverse.Create(rd).Field("amountOfItems").SetValue(amountToDrop); 
+            Traverse.Create(rd).Field("amountOfItems").SetValue(amountToDrop);
             Traverse.Create(rd).Field("randomDropperAsset").SetValue(dropperAsset);
             pi.dropper = rd;
 
             pi.pickupItemType = PickupItemType.Default;
             pi.canBePickedUp = true;
-            pi.requiresHands = true; 
+            pi.requiresHands = true;
             if (pi.itemInstance == null) pi.itemInstance = new ItemInstance();
-            pi.itemInstance.Uses = 1; 
+            pi.itemInstance.Uses = 1;
 
             pi.networkID = pin;
             SetupNetwork(pin, lipi);
@@ -525,7 +544,7 @@ namespace BetterTrees
             // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring {targetObject.name} with tag {ChoppableTreesModConstants.Tag_Tree} and layer {LayerMask.LayerToName(treeLyr)}, removing specific components.");
             targetObject.tag = ChoppableTreesModConstants.Tag_Tree;
             targetObject.layer = treeLyr;
-            
+
             Component[] componentsToRemove = new Component[] {
                 targetObject.GetComponent<PickupItem>(),
                 targetObject.GetComponent<HarvestableTree>(),
@@ -534,15 +553,17 @@ namespace BetterTrees
                 targetObject.GetComponent<YieldHandler>(),
                 targetObject.GetComponent<RandomDropper>()
             };
-            foreach (var component in componentsToRemove.Where(c => c != null)) {
+            foreach (var component in componentsToRemove.Where(c => c != null))
+            {
                 if (Application.isEditor && !Application.isPlaying)
                     Object.DestroyImmediate(component);
                 else
                     Object.Destroy(component);
             }
-            
+
             CapsuleCollider collider = targetObject.GetComponent<CapsuleCollider>();
-            if (collider == null) {
+            if (collider == null)
+            {
                 collider = targetObject.AddComponent<CapsuleCollider>();
                 collider.height = 4f;
                 collider.radius = 0.5f;
@@ -551,7 +572,7 @@ namespace BetterTrees
             }
             collider.enabled = true;
             collider.isTrigger = false;
-            
+
             targetObject.GetOrAddComponent<RaycastInteractable>();
         }
 
@@ -560,7 +581,7 @@ namespace BetterTrees
                                        string particleEffect, ColliderData colliderConfig, string interactionColliderName, List<GameObject> processedObjects)
         {
             // // Debug.Log($"{BetterTrees.Main.logPrefix} SetupBasic (for Log): Configuring {targetObject.name}");
-            
+
             PickupItem pi = targetObject.GetOrAddComponent<PickupItem>();
             HarvestableTree ht = targetObject.GetOrAddComponent<HarvestableTree>();
             PickupItem_Networked pin = targetObject.GetOrAddComponent<PickupItem_Networked>();
@@ -578,8 +599,10 @@ namespace BetterTrees
             pi.yieldHandler = yh;
             SO_ItemYield yieldAsset = CreateRuntimeAsset<SO_ItemYield>(targetObject);
             yieldAsset.yieldAssets = new List<Cost>();
-            if (yieldItems != null) {
-                foreach (var itemData in yieldItems) {
+            if (yieldItems != null)
+            {
+                foreach (var itemData in yieldItems)
+                {
                     Item_Base item = ItemManager.GetItemByName(itemData.ItemName);
                     if (item != null)
                         yieldAsset.yieldAssets.Add(new Cost(item, itemData.Amount));
@@ -594,9 +617,11 @@ namespace BetterTrees
             SO_RandomDropper dropperAsset = CreateRuntimeAsset<SO_RandomDropper>(targetObject);
             if (dropperAsset.randomizer == null) dropperAsset.randomizer = new Randomizer();
             dropperAsset.randomizer.items = System.Array.Empty<RandomItem>();
-            if (dropItems != null) {
+            if (dropItems != null)
+            {
                 List<RandomItem> randomItemList = new List<RandomItem>();
-                foreach (var dropData in dropItems) {
+                foreach (var dropData in dropItems)
+                {
                     Item_Base item = ItemManager.GetItemByName(dropData.ItemName);
                     if (item != null)
                         randomItemList.Add(new RandomItem { obj = item, weight = dropData.Weight, spawnChance = dropData.Chance });
@@ -611,33 +636,37 @@ namespace BetterTrees
             Traverse.Create(ht).Field("pickupItem").SetValue(pi);
             Traverse.Create(ht).Field("hideOnDepleted").SetValue(true);
             Traverse.Create(ht).Field("particleSystemName").SetValue(particleEffect);
-            
+
             Transform[] particlePositionsBasic = targetObject.GetComponentsInChildren<Transform>(true)
                 .Where(c => c.name.ToLower().Contains("particle_spawn") || c.name.ToLower().Contains("particleorigin")).ToArray();
             if (particlePositionsBasic.Length == 0)
                 particlePositionsBasic = targetObject.GetComponentsInChildren<Transform>(true).Where(c => c.name.ToLower().Contains("particle")).ToArray();
             Traverse.Create(ht).Field("particleSpawnPositions").SetValue(particlePositionsBasic.Length > 0 ? particlePositionsBasic : new[] { targetObject.transform });
-            
+
             SetupInteractionCollider(targetObject, treeLyr, colliderConfig, interactionColliderName);
-            
+
             targetObject.layer = defaultLyr;
             targetObject.tag = ChoppableTreesModConstants.Tag_Tree;
 
             Transform interactionColliderGO_Transform = targetObject.transform.Find(interactionColliderName);
-            if (interactionColliderGO_Transform != null && interactionColliderGO_Transform.gameObject != targetObject) {
+            if (interactionColliderGO_Transform != null && interactionColliderGO_Transform.gameObject != targetObject)
+            {
                 RaycastInteractable rootBasicRI = targetObject.GetComponent<RaycastInteractable>();
-                if (rootBasicRI != null) {
+                if (rootBasicRI != null)
+                {
                     if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(rootBasicRI); else Object.Destroy(rootBasicRI);
                 }
-                if(interactionColliderGO_Transform.parent == targetObject) {
-                    foreach(var rootCol in targetObject.GetComponents<Collider>().Where(c => c.gameObject == targetObject)) {
+                if (interactionColliderGO_Transform.parent == targetObject)
+                {
+                    foreach (var rootCol in targetObject.GetComponents<Collider>().Where(c => c.gameObject == targetObject))
+                    {
                         if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(rootCol); else Object.Destroy(rootCol);
                     }
                 }
             }
             SetupNetwork(pin, lipi);
         }
-        
+
         static void ConfigureChoppableBaseLogic(GameObject rootObject, int uses, string particleEffect,
                                                out PickupItem pi, out HarvestableTree ht,
                                                out PickupItem_Networked pin, out LandmarkItem_PickupItem lipi,
@@ -658,7 +687,7 @@ namespace BetterTrees
 
             yh = rootObject.GetOrAddComponent<YieldHandler>();
             pi.yieldHandler = yh;
-            
+
             rd = rootObject.GetOrAddComponent<RandomDropper>();
             pi.dropper = rd;
             SO_RandomDropper dropperAsset = CreateRuntimeAsset<SO_RandomDropper>(rootObject);
@@ -670,7 +699,7 @@ namespace BetterTrees
             Traverse.Create(ht).Field("pickupItem").SetValue(pi);
             Traverse.Create(ht).Field("hideOnDepleted").SetValue(true);
             Traverse.Create(ht).Field("particleSystemName").SetValue(particleEffect);
-            
+
             Transform[] particlePositions = rootObject.GetComponentsInChildren<Transform>(true)
                 .Where(c => c.name.ToLower().Contains("particle_spawn") || c.name.ToLower().Contains("particleorigin"))
                 .ToArray();
@@ -717,7 +746,7 @@ namespace BetterTrees
                 }
             }
             yh.yieldAsset = yieldAsset;
-            
+
             string[] collisionObjectNames = { ChoppableTreesModConstants.ColliderName_BigPalm_CollisionObject0, ChoppableTreesModConstants.ColliderName_BigPalm_CollisionObject1 };
             bool collisionObjectConfigured = false;
             foreach (string colName in collisionObjectNames)
@@ -725,7 +754,7 @@ namespace BetterTrees
                 Transform colTransform = rootObject.transform.Find(colName);
                 if (colTransform != null)
                 {
-                    GameObject colGO = colTransform.gameObject; 
+                    GameObject colGO = colTransform.gameObject;
                     // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring BigPalm collision object: {colGO.name}");
                     colGO.tag = ChoppableTreesModConstants.Tag_Tree;
                     colGO.layer = treeLyr;
@@ -752,7 +781,7 @@ namespace BetterTrees
 
             if (!collisionObjectConfigured)
             {
-                 Debug.LogWarning($"{BetterTrees.Main.logPrefix} BigPalmSpecial: NO collision objects ({string.Join("/", collisionObjectNames)}) found for {rootObject.name}. Interaction might not work as intended.");
+                Debug.LogWarning($"{BetterTrees.Main.logPrefix} BigPalmSpecial: NO collision objects ({string.Join("/", collisionObjectNames)}) found for {rootObject.name}. Interaction might not work as intended.");
             }
 
             RaycastInteractable rootRI = rootObject.GetComponent<RaycastInteractable>();
@@ -764,13 +793,13 @@ namespace BetterTrees
             {
                 if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(col); else Object.Destroy(col);
             }
-            
+
             rootObject.tag = ChoppableTreesModConstants.Tag_Tree;
             rootObject.layer = defaultLyr;
 
             // Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured BigPalmSpecial: {rootObject.name}. Interaction via {string.Join("/", collisionObjectNames)}.");
         }
-        
+
         static void ConfigureDeadTreeWithSpecificColliders(GameObject rootObject, int treeLyr, int defaultLyr, List<MinMaxLootConfig> lootList, int uses, string particleEffect, List<GameObject> processedObjects)
         {
             // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring DeadTreeWithSpecificColliders: {rootObject.name}");
@@ -816,8 +845,8 @@ namespace BetterTrees
                 Transform colTransform = rootObject.transform.Find(colName);
                 if (colTransform != null)
                 {
-                    GameObject colGO = colTransform.gameObject; 
-                  //  // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring DeadTree specific collider: {colGO.name}"); 
+                    GameObject colGO = colTransform.gameObject;
+                    //  // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring DeadTree specific collider: {colGO.name}"); 
                     colGO.tag = ChoppableTreesModConstants.Tag_Tree;
                     colGO.layer = treeLyr;
                     colGO.GetOrAddComponent<RaycastInteractable>();
@@ -828,11 +857,11 @@ namespace BetterTrees
                         actualCollider.isTrigger = false;
                     }
                     specificCollidersConfigured = true;
-                    
+
                     if (!processedObjects.Contains(colGO))
                     {
                         processedObjects.Add(colGO);
-                       // // Debug.Log($"{BetterTrees.Main.logPrefix} ConfigureDeadTree for '{rootObject.name}': Marked child '{colGO.name}' as processed."); 
+                        // // Debug.Log($"{BetterTrees.Main.logPrefix} ConfigureDeadTree for '{rootObject.name}': Marked child '{colGO.name}' as processed."); 
                     }
                 }
                 else
@@ -843,9 +872,9 @@ namespace BetterTrees
 
             if (!specificCollidersConfigured)
             {
-              //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} DeadTree: NO specific colliders ({string.Join("/", specificColliderNames)}) found for {rootObject.name}. Interaction might not work as intended.");
+                //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} DeadTree: NO specific colliders ({string.Join("/", specificColliderNames)}) found for {rootObject.name}. Interaction might not work as intended.");
             }
-            
+
             RaycastInteractable rootRI = rootObject.GetComponent<RaycastInteractable>();
             if (rootRI != null)
             {
@@ -853,24 +882,39 @@ namespace BetterTrees
             }
             foreach (var col in rootObject.GetComponents<Collider>().ToList())
             {
-                 if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(col); else Object.Destroy(col);
+                if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(col); else Object.Destroy(col);
             }
 
             rootObject.tag = ChoppableTreesModConstants.Tag_Tree;
             rootObject.layer = defaultLyr;
 
-           // // Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured DeadTree: {rootObject.name}. Interaction via specific children: {string.Join("/", specificColliderNames)}."); 
+            // // Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured DeadTree: {rootObject.name}. Interaction via specific children: {string.Join("/", specificColliderNames)}."); 
         }
 
 
         static void ConfigureTemplateObject(GameObject rootObject, int treeLyr, int defaultLyr, List<MinMaxLootConfig> lootList, int uses, string particleEffect, bool adjustBananaBushCollider, ColliderType? defaultColliderForCreation, List<GameObject> processedObjects, bool preserveOriginalPhysicsColliders = false)
         {
-           // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring Template Object (MinMaxLoot): {rootObject.name}");
+            // // Debug.Log($"{BetterTrees.Main.logPrefix} Configuring Template Object (MinMaxLoot): {rootObject.name}");
+
+            // Исходные таблицы лута игровых деревьев не должны заменяться настройками мода
+            string treeName = rootObject.name.ToLowerInvariant();
+            bool nativeTreeLoot = treeName.Contains("birchtree_big") ||
+                treeName.Contains("firtree_big") || treeName.Contains("pinetree_big") ||
+                treeName.Contains("tp_pinetreesnowy");
+            YieldHandler originalYield = nativeTreeLoot ? rootObject.GetComponent<YieldHandler>() : null;
+            SO_ItemYield nativeYieldAsset = originalYield != null ? originalYield.yieldAsset : null;
+            bool hasNativeYield = nativeYieldAsset != null && nativeYieldAsset.yieldAssets != null &&
+                nativeYieldAsset.yieldAssets.Count > 0;
+            RandomDropper originalDropper = nativeTreeLoot ? rootObject.GetComponent<RandomDropper>() : null;
+            SO_RandomDropper nativeDropAsset = originalDropper != null ?
+                Traverse.Create(originalDropper).Field("randomDropperAsset").GetValue<SO_RandomDropper>() : null;
+            Interval_Int nativeDropCount = originalDropper != null ?
+                Traverse.Create(originalDropper).Field("amountOfItems").GetValue<Interval_Int>() : default(Interval_Int);
 
             ConfigureChoppableBaseLogic(rootObject, uses, particleEffect,
                                         out _, out _, out _, out _,
-                                        out YieldHandler yh, out _);
-            
+                                        out YieldHandler yh, out RandomDropper configuredDropper);
+
             SO_ItemYield yieldAsset = CreateRuntimeAsset<SO_ItemYield>(rootObject);
             yieldAsset.yieldAssets = new List<Cost>();
             if (lootList != null)
@@ -880,7 +924,7 @@ namespace BetterTrees
                     Item_Base item = ItemManager.GetItemByName(lootConfig.ItemName);
                     if (item == null)
                     {
-                      //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: Yield item '{lootConfig.ItemName}' not found for {rootObject.name}.");
+                        //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: Yield item '{lootConfig.ItemName}' not found for {rootObject.name}.");
                         continue;
                     }
                     int amountToDrop = lootConfig.MinAmount;
@@ -895,32 +939,42 @@ namespace BetterTrees
                     }
                 }
             }
-            yh.yieldAsset = yieldAsset;
+            yh.yieldAsset = hasNativeYield ? nativeYieldAsset : yieldAsset;
+            if (hasNativeYield) yh.ResetYield();
+            if (nativeDropAsset != null)
+            {
+                Traverse.Create(configuredDropper).Field("randomDropperAsset").SetValue(nativeDropAsset);
+                Traverse.Create(configuredDropper).Field("amountOfItems").SetValue(nativeDropCount);
+            }
 
             GameObject colliderHolderGO = null;
-            List<Collider> collidersToCopyFrom = new List<Collider>(); 
+            List<Collider> collidersToCopyFrom = new List<Collider>();
             bool foundColliderOnRoot = false;
-            GameObject childColliderSourceGameObject = null; 
+            GameObject childColliderSourceGameObject = null;
 
             Collider[] rootObjectColliders = rootObject.GetComponents<Collider>();
-            if (rootObjectColliders.Length > 0) {
+            if (rootObjectColliders.Length > 0)
+            {
                 collidersToCopyFrom.AddRange(rootObjectColliders.Where(c => !c.isTrigger));
-                if(collidersToCopyFrom.Any()) foundColliderOnRoot = true;
+                if (collidersToCopyFrom.Any()) foundColliderOnRoot = true;
             }
-            
-            if (!foundColliderOnRoot) { 
+
+            if (!foundColliderOnRoot)
+            {
                 Collider firstChildCollider = rootObject.GetComponentsInChildren<Collider>(true)
                                                      .FirstOrDefault(c => c.gameObject != rootObject && !c.isTrigger);
-                if (firstChildCollider == null) {
+                if (firstChildCollider == null)
+                {
                     firstChildCollider = rootObject.GetComponentsInChildren<Collider>(true)
                                                  .FirstOrDefault(c => c.gameObject != rootObject);
                 }
-                if (firstChildCollider != null) {
+                if (firstChildCollider != null)
+                {
                     collidersToCopyFrom.Add(firstChildCollider);
-                    childColliderSourceGameObject = firstChildCollider.gameObject; 
+                    childColliderSourceGameObject = firstChildCollider.gameObject;
                 }
             }
-            
+
             colliderHolderGO = new GameObject(ChoppableTreesModConstants.ColliderName_InteractionNew);
             colliderHolderGO.transform.SetParent(rootObject.transform, false);
             colliderHolderGO.transform.localPosition = Vector3.zero;
@@ -942,16 +996,21 @@ namespace BetterTrees
             }
 
             bool successfullyCopiedOrCreatedCollider = false;
-            if (collidersToCopyFrom.Any()) {
-                foreach (Collider colToCopy in collidersToCopyFrom) { 
+            if (collidersToCopyFrom.Any())
+            {
+                foreach (Collider colToCopy in collidersToCopyFrom)
+                {
                     Collider copied = CopyColliderToGameObject(colToCopy, colliderHolderGO);
-                    if (copied != null) {
+                    if (copied != null)
+                    {
                         successfullyCopiedOrCreatedCollider = true;
 
-                        if (childColliderSourceGameObject != null && colToCopy.gameObject == childColliderSourceGameObject) {
-                            if (!processedObjects.Contains(childColliderSourceGameObject)) {
+                        if (childColliderSourceGameObject != null && colToCopy.gameObject == childColliderSourceGameObject)
+                        {
+                            if (!processedObjects.Contains(childColliderSourceGameObject))
+                            {
                                 processedObjects.Add(childColliderSourceGameObject);
-                              //  // Debug.Log($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject for '{rootObject.name}': Marked child '{childColliderSourceGameObject.name}' as processed because its collider was used.");
+                                //  // Debug.Log($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject for '{rootObject.name}': Marked child '{childColliderSourceGameObject.name}' as processed because its collider was used.");
                             }
                         }
                         if (!preserveOriginalPhysicsColliders)
@@ -964,68 +1023,74 @@ namespace BetterTrees
                     }
                 }
             }
-            
-            if (!successfullyCopiedOrCreatedCollider) { 
+
+            if (!successfullyCopiedOrCreatedCollider)
+            {
                 ColliderType typeToCreate = defaultColliderForCreation ?? ColliderType.Box;
 
                 if (typeToCreate == ColliderType.Capsule)
                 {
                     CapsuleCollider defaultCap = colliderHolderGO.AddComponent<CapsuleCollider>();
                     defaultCap.radius = 0.5f;
-                    defaultCap.height = 2f;  
+                    defaultCap.height = 2f;
                     defaultCap.direction = 1;
-                  //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: No suitable collider found for {rootObject.name}. Created default CapsuleCollider on '{colliderHolderGO.name}'.");
+                    //  Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: No suitable collider found for {rootObject.name}. Created default CapsuleCollider on '{colliderHolderGO.name}'.");
                 }
-                else 
+                else
                 {
                     BoxCollider defaultBox = colliderHolderGO.AddComponent<BoxCollider>();
                     defaultBox.size = Vector3.one;
-                   // Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: No suitable collider found for {rootObject.name}. Created default BoxCollider on '{colliderHolderGO.name}'.");
+                    // Debug.LogWarning($"{BetterTrees.Main.logPrefix} ConfigureTemplateObject: No suitable collider found for {rootObject.name}. Created default BoxCollider on '{colliderHolderGO.name}'.");
                 }
-                successfullyCopiedOrCreatedCollider = true; 
+                successfullyCopiedOrCreatedCollider = true;
             }
 
             if (adjustBananaBushCollider && successfullyCopiedOrCreatedCollider && colliderHolderGO != null)
             {
-               // // Debug.Log($"{BetterTrees.Main.logPrefix} Attempting to adjust Banana_Bush collider on {colliderHolderGO.name}");
+                // // Debug.Log($"{BetterTrees.Main.logPrefix} Attempting to adjust Banana_Bush collider on {colliderHolderGO.name}");
                 foreach (Collider colInHolder in colliderHolderGO.GetComponents<Collider>())
                 {
                     if (colInHolder is BoxCollider boxCol)
                     {
                         float originalHeight = boxCol.size.y;
-                        float newHeight = Mathf.Max(originalHeight, 1.0f) * 1.5f; 
+                        float newHeight = Mathf.Max(originalHeight, 1.0f) * 1.5f;
                         boxCol.size = new Vector3(boxCol.size.x, newHeight, boxCol.size.z);
-                      //  // Debug.Log($"{BetterTrees.Main.logPrefix} Adjusted Banana_Bush BoxCollider height from {originalHeight} to: {newHeight}");
+                        //  // Debug.Log($"{BetterTrees.Main.logPrefix} Adjusted Banana_Bush BoxCollider height from {originalHeight} to: {newHeight}");
                     }
                     else if (colInHolder is CapsuleCollider capCol)
                     {
                         float originalHeight = capCol.height;
-                        capCol.height *= 1.5f; 
-                       // // Debug.Log($"{BetterTrees.Main.logPrefix} Adjusted Banana_Bush CapsuleCollider height from {originalHeight} to: {capCol.height}");из Main
+                        capCol.height *= 1.5f;
+                        // // Debug.Log($"{BetterTrees.Main.logPrefix} Adjusted Banana_Bush CapsuleCollider height from {originalHeight} to: {capCol.height}");из Main
                     }
                 }
             }
-            
-            if (successfullyCopiedOrCreatedCollider && colliderHolderGO != null) {
+
+            if (successfullyCopiedOrCreatedCollider && colliderHolderGO != null)
+            {
                 colliderHolderGO.tag = ChoppableTreesModConstants.Tag_Tree;
                 colliderHolderGO.layer = treeLyr;
                 colliderHolderGO.GetOrAddComponent<RaycastInteractable>();
-                foreach (Collider colInHolder in colliderHolderGO.GetComponents<Collider>()) { 
+                foreach (Collider colInHolder in colliderHolderGO.GetComponents<Collider>())
+                {
                     colInHolder.enabled = true;
                     colInHolder.isTrigger = false;
                 }
-            } else if (colliderHolderGO != null) { 
+            }
+            else if (colliderHolderGO != null)
+            {
                 if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(colliderHolderGO); else Object.Destroy(colliderHolderGO);
             }
 
             rootObject.tag = ChoppableTreesModConstants.Tag_Tree;
             rootObject.layer = defaultLyr;
-            
+
             RaycastInteractable rootRI = rootObject.GetComponent<RaycastInteractable>();
-            if (rootRI != null) {
+            if (rootRI != null)
+            {
                 if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(rootRI); else Object.Destroy(rootRI);
             }
-            
+
             if (!preserveOriginalPhysicsColliders)
             {
                 foreach (Collider col in rootObject.GetComponents<Collider>().ToList())
@@ -1036,43 +1101,51 @@ namespace BetterTrees
                         Object.Destroy(col);
                 }
             }
-           // // Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured Template Object (MinMaxLoot): {rootObject.name}. Interaction via '{colliderHolderGO?.name ?? "UNKNOWN_COLLIDER_HOLDER"}'.");
+            // // Debug.Log($"{BetterTrees.Main.logPrefix} Successfully configured Template Object (MinMaxLoot): {rootObject.name}. Interaction via '{colliderHolderGO?.name ?? "UNKNOWN_COLLIDER_HOLDER"}'.");
         }
 
         static void SetupInteractionCollider(GameObject parentObject, int treeLyr, ColliderData config, string colliderObjectName)
         {
             Transform colliderT = parentObject.transform.Find(colliderObjectName);
             GameObject colliderGO;
-            if (colliderT == null) {
+            if (colliderT == null)
+            {
                 colliderGO = new GameObject(colliderObjectName);
                 colliderGO.transform.SetParent(parentObject.transform, false);
                 colliderGO.transform.localPosition = Vector3.zero;
                 colliderGO.transform.localRotation = Quaternion.identity;
                 colliderGO.transform.localScale = Vector3.one;
-            } else {
+            }
+            else
+            {
                 colliderGO = colliderT.gameObject;
             }
-            
-            foreach(Collider col in colliderGO.GetComponents<Collider>()) {
+
+            foreach (Collider col in colliderGO.GetComponents<Collider>())
+            {
                 if (Application.isEditor && !Application.isPlaying) Object.DestroyImmediate(col); else Object.Destroy(col);
             }
-            
+
             Collider newCol = null;
-            if (config.Type == ColliderType.Capsule) {
+            if (config.Type == ColliderType.Capsule)
+            {
                 CapsuleCollider cap = colliderGO.AddComponent<CapsuleCollider>();
                 cap.height = config.Param1;
                 cap.radius = config.Param2;
-                cap.direction = (int)config.Param3; 
+                cap.direction = (int)config.Param3;
                 cap.center = Vector3.zero;
                 newCol = cap;
-            } else if (config.Type == ColliderType.Box) {
+            }
+            else if (config.Type == ColliderType.Box)
+            {
                 BoxCollider box = colliderGO.AddComponent<BoxCollider>();
                 box.size = new Vector3(config.Param1, config.Param2, config.Param3);
                 box.center = Vector3.zero;
                 newCol = box;
             }
-            
-            if (newCol != null) {
+
+            if (newCol != null)
+            {
                 newCol.enabled = true;
                 newCol.isTrigger = false;
                 colliderGO.layer = treeLyr;
@@ -1092,39 +1165,51 @@ namespace BetterTrees
             Collider newCollider = null;
             System.Type colliderType = sourceCollider.GetType();
 
-            if (sourceCollider is BoxCollider boxSource) {
+            if (sourceCollider is BoxCollider boxSource)
+            {
                 BoxCollider boxTarget = targetGO.AddComponent<BoxCollider>();
                 boxTarget.center = boxSource.center; boxTarget.size = boxSource.size; newCollider = boxTarget;
-            } else if (sourceCollider is SphereCollider sphereSource) {
+            }
+            else if (sourceCollider is SphereCollider sphereSource)
+            {
                 SphereCollider sphereTarget = targetGO.AddComponent<SphereCollider>();
                 sphereTarget.center = sphereSource.center; sphereTarget.radius = sphereSource.radius; newCollider = sphereTarget;
-            } else if (sourceCollider is CapsuleCollider capsuleSource) {
+            }
+            else if (sourceCollider is CapsuleCollider capsuleSource)
+            {
                 CapsuleCollider capsuleTarget = targetGO.AddComponent<CapsuleCollider>();
                 capsuleTarget.center = capsuleSource.center; capsuleTarget.radius = capsuleSource.radius;
                 capsuleTarget.height = capsuleSource.height; capsuleTarget.direction = capsuleSource.direction; newCollider = capsuleTarget;
-            } else if (sourceCollider is MeshCollider meshSource) {
+            }
+            else if (sourceCollider is MeshCollider meshSource)
+            {
                 MeshCollider meshTarget = targetGO.AddComponent<MeshCollider>();
                 meshTarget.sharedMesh = meshSource.sharedMesh;
-                meshTarget.convex = meshSource.convex; 
+                meshTarget.convex = meshSource.convex;
                 newCollider = meshTarget;
             }
-            
-            if (newCollider != null) {
-                newCollider.isTrigger = sourceCollider.isTrigger; 
-                newCollider.sharedMaterial = sourceCollider.sharedMaterial; 
-                newCollider.enabled = sourceCollider.enabled;  
-            } else {
+
+            if (newCollider != null)
+            {
+                newCollider.isTrigger = sourceCollider.isTrigger;
+                newCollider.sharedMaterial = sourceCollider.sharedMaterial;
+                newCollider.enabled = sourceCollider.enabled;
+            }
+            else
+            {
                 //Debug.LogWarning($"{BetterTrees.Main.logPrefix} CopyColliderToGameObject: Unsupported collider type: {colliderType} on {sourceCollider.gameObject.name} for target {targetGO.name}.");
             }
             return newCollider;
         }
 
-        static void SetupNetwork(PickupItem_Networked pin, LandmarkItem_PickupItem lipi) {
-            if (pin == null || lipi == null) {
-               // Debug.LogWarning($"{BetterTrees.Main.logPrefix} SetupNetwork for {lipi?.gameObject.name ?? pin?.gameObject.name ?? "UNKNOWN"}: One or more network components are null. Skipping.");
+        static void SetupNetwork(PickupItem_Networked pin, LandmarkItem_PickupItem lipi)
+        {
+            if (pin == null || lipi == null)
+            {
+                // Debug.LogWarning($"{BetterTrees.Main.logPrefix} SetupNetwork for {lipi?.gameObject.name ?? pin?.gameObject.name ?? "UNKNOWN"}: One or more network components are null. Skipping.");
                 return;
             }
-            pin.spawnType = (ObjectSpawnType)2; 
+            pin.spawnType = (ObjectSpawnType)2;
             Traverse.Create(pin).Field("stopTrackingOnPickup").SetValue(false);
             Traverse.Create(pin).Field("stopTrackUseRPC").SetValue(true);
 

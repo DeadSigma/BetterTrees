@@ -1,0 +1,16 @@
+sapling_Palm_name=Big Palm Seeds
+sapling_Palm_description=Grows into a large island palm.
+sapling_Pine_name=Giant Pine Seeds
+sapling_Pine_description=Grows into a giant island pine.
+sapling_Birch_name=Giant Birch Seeds
+sapling_Birch_description=Grows into a giant island birch.
+sapling_Fir_name=Giant Fir Seeds
+sapling_Fir_description=Grows into a giant island fir.
+sapling_SnowyPine_name=Snowy Pine Seeds
+sapling_SnowyPine_description=Grows into a snowy island pine.
+sapling_DecorativeBanana_name=Decorative Banana Seeds
+sapling_DecorativeBanana_description=Grows into a decorative banana plant that does not produce bananas.
+sapling_DeadTree_name=Dead Tree Seeds
+sapling_DeadTree_description=Grows into a dry, leafless tree from the islands.
+sapling_BalboaBush_name=Balboa Bush Seeds
+sapling_BalboaBush_description=Grows into a bush native to Balboa Island.

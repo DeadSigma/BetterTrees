@@ -2,14 +2,14 @@
   "name": "Better Trees",
   "author": "El_Neuman",
   "description": "Turns decorative trees, props into usable resources. Chop, loot, dismantle — even what used to be just decoration.",
-  "version": "1.4.1", 
+  "version": "1.4.2", 
   "license": "",
   "icon": "icon.png",
   "banner": "banner.jpg",
   "gameVersion": "1.0",
   "requiredByAllPlayers": true,
   "updateUrl": "https://www.raftmodding.com/api/v1/mods/better-trees/version.txt",
-  "isModPermanent": false,
+  "isModPermanent": true,
   "excludedFiles": [],
   "modSettings": [
     {

@@ -1,0 +1,16 @@
+sapling_Palm_name=Семена большой пальмы
+sapling_Palm_description=Вырастает в большую островную пальму
+sapling_Pine_name=Семена гигантской сосны
+sapling_Pine_description=Вырастает в гигантскую островную сосну
+sapling_Birch_name=Семена гигантской берёзы
+sapling_Birch_description=Вырастает в гигантскую островную берёзу
+sapling_Fir_name=Семена гигантской ели
+sapling_Fir_description=Вырастает в гигантскую островную ель
+sapling_SnowyPine_name=Семена снежной сосны
+sapling_SnowyPine_description=Вырастает в снежную островную сосну
+sapling_DecorativeBanana_name=Семена декоративного банана
+sapling_DecorativeBanana_description=Вырастает в декоративный банан, который не приносит плодов
+sapling_DeadTree_name=Семена сухого дерева
+sapling_DeadTree_description=Вырастает в сухое дерево без листвы
+sapling_BalboaBush_name=Семена куста Бальбоа
+sapling_BalboaBush_description=Вырастает в куст с острова Бальбоа

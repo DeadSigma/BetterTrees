@@ -98,9 +98,19 @@ namespace BetterTrees
             if (state == null)
                 return false;
 
-            int hitsRequired = GetHitsRequired(requestMarker);
-            state.HitProgress++;
+            SaplingKind kind;
+            bool decorativeBanana = BetterTreesSaplings.TryGetKind(tree.name, out kind) &&
+                kind == SaplingKind.DecorativeBanana;
 
+            int hitsRequired;
+            if (decorativeBanana && requestMarker == RequestStone)
+                hitsRequired = 3;
+            else if (decorativeBanana && (requestMarker == RequestMetal || requestMarker == RequestTitanium))
+                hitsRequired = 2;
+            else
+                hitsRequired = GetHitsRequired(requestMarker);
+
+            state.HitProgress++;
             if (state.HitProgress < hitsRequired)
                 return false;
 
@@ -110,8 +120,18 @@ namespace BetterTrees
 
         public static void DepleteTree(HarvestableTree tree, PlayerInventory inventory)
         {
-            if (tree == null)
+            // Повторный сетевой пакет не должен создавать дополнительное семечко
+            if (tree == null || tree.Depleted)
                 return;
+
+            try
+            {
+                BetterTreesSaplings.RememberSource(tree);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{Main.logPrefix} Failed to cache tree before harvest: {ex}");
+            }
 
             int remaining = MaxHarvestPasses;
             while (!tree.Depleted && remaining-- > 0)
@@ -121,7 +141,9 @@ namespace BetterTrees
             }
 
             if (!tree.Depleted)
-                Debug.LogWarning($"{Main.logPrefix} Tree could not be fully harvested: {tree.gameObject.name}");
+                return;
+
+            // Семечко выдаётся Harmony-патчем Harvest только один раз
         }
 
         public static HarvestableTree FindTree(Vector3 hitPoint)
@@ -222,10 +244,13 @@ namespace BetterTrees
             if (!Helper.HitAtCursor(out rayHit, 5f, __instance.hitmask, QueryTriggerInteraction.UseGlobal))
                 return true;
 
-            if (!rayHit.transform.CompareTag("Tree"))
+            if (rayHit.transform == null)
                 return true;
 
             HarvestableTree tree = rayHit.transform.GetComponentInParent<HarvestableTree>();
+            if (!rayHit.transform.CompareTag("Tree"))
+                return true;
+
             if (tree == null || tree.Depleted || tree.GetComponent<BetterTreesChoppable>() == null)
                 return true;
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 namespace BetterTrees
@@ -715,7 +715,6 @@ namespace BetterTrees
             objectConfigurators.Add("banana_bush", (obj, treeLyr, defLyr, nameLower, processedObjects) => {
                 List<MinMaxLootConfig> loot = new List<MinMaxLootConfig> {
                     new MinMaxLootConfig(ChoppableTreesModConstants.PlankItemName, 1, 1, 33),
-					new MinMaxLootConfig(ChoppableTreesModConstants.BananaItemName, 0, 1, 10),
                     new MinMaxLootConfig(ChoppableTreesModConstants.PalmLeafItemName, 2, 5, 30)
                 };
                 ConfigureTemplateObject(obj, treeLyr, defLyr, loot, 10, ChoppableTreesModConstants.Particle_TreeBreak, true, ColliderType.Capsule, processedObjects);
@@ -773,7 +772,6 @@ namespace BetterTrees
             objectConfigurators.Add("tp_pinetreesnowy", (obj, treeLyr, defLyr, nameLower, processedObjects) => {
                 List<MinMaxLootConfig> loot = new List<MinMaxLootConfig> {
                     new MinMaxLootConfig(ChoppableTreesModConstants.PlankItemName, 4, 6, 70),
-                    new MinMaxLootConfig(ChoppableTreesModConstants.Seed_PineItemName, 1, 3, 30),
                     new MinMaxLootConfig(ChoppableTreesModConstants.FeatherItemName, 0, 2, 10), //copy that to another trees
                     new MinMaxLootConfig(ChoppableTreesModConstants.EggItemName, 0, 2, 10)
                 };
@@ -790,7 +788,6 @@ namespace BetterTrees
             objectConfigurators.Add("pinetree_big", (obj, treeLyr, defLyr, nameLower, processedObjects) => {
                 List<MinMaxLootConfig> loot = new List<MinMaxLootConfig> {
                     new MinMaxLootConfig(ChoppableTreesModConstants.PlankItemName, 7, 21, 70),
-                    new MinMaxLootConfig(ChoppableTreesModConstants.Seed_PineItemName, 1, 3, 30),
                     new MinMaxLootConfig(ChoppableTreesModConstants.FeatherItemName, 0, 2, 10),
                     new MinMaxLootConfig(ChoppableTreesModConstants.EggItemName, 0, 2, 10)
                 };
@@ -799,7 +796,6 @@ namespace BetterTrees
             objectConfigurators.Add("birchtree_big", (obj, treeLyr, defLyr, nameLower, processedObjects) => {
                 List<MinMaxLootConfig> loot = new List<MinMaxLootConfig> {
                     new MinMaxLootConfig(ChoppableTreesModConstants.PlankItemName, 5, 11, 70),
-                    new MinMaxLootConfig(ChoppableTreesModConstants.Seed_BirchItemName, 0, 3, 30),
                     new MinMaxLootConfig(ChoppableTreesModConstants.FeatherItemName, 0, 2, 10),
                     new MinMaxLootConfig(ChoppableTreesModConstants.EggItemName, 0, 2, 10)
                 };
@@ -808,7 +804,6 @@ namespace BetterTrees
             objectConfigurators.Add("firtree_big", (obj, treeLyr, defLyr, nameLower, processedObjects) => {
                 List<MinMaxLootConfig> loot = new List<MinMaxLootConfig> {
                     new MinMaxLootConfig(ChoppableTreesModConstants.PlankItemName, 6, 15, 70),
-                    new MinMaxLootConfig(ChoppableTreesModConstants.Seed_PineItemName, 0, 3, 30),
                     new MinMaxLootConfig(ChoppableTreesModConstants.FeatherItemName, 0, 2, 10),
                     new MinMaxLootConfig(ChoppableTreesModConstants.EggItemName, 0, 2, 10)
                 };
