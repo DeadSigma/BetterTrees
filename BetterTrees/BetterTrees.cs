@@ -286,6 +286,7 @@ namespace BetterTrees
 
 
     [HarmonyPatch(typeof(Landmark), "Initialize")]
+    [HarmonyAfter("com.aidanamite.MoreBananas")]
     public partial class Patch_Landmark_Initialize_Choppables
     {
         private static Dictionary<string, System.Action<GameObject, int, int, string, List<GameObject>>> objectConfigurators;
@@ -297,9 +298,62 @@ namespace BetterTrees
 
 
 
+        private const string MoreBananasHarmonyId = "com.aidanamite.MoreBananas";
+        private const string MoreBananasTreeName = "MoreBananas_Banana_Bush";
+
+        private static HashSet<Transform> GetMoreBananasReservedTransforms(Landmark landmark)
+        {
+            var method = AccessTools.Method(typeof(Landmark), "Initialize");
+            var patches = method != null ? Harmony.GetPatchInfo(method) : null;
+            if (patches == null || !patches.Prefixes.Any(p => p.owner == MoreBananasHarmonyId))
+                return null;
+
+            var reserved = new HashSet<Transform>();
+            foreach (MeshRenderer renderer in landmark.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (renderer == null ||
+                    (!renderer.name.Contains("Banana_Bush") &&
+                     !renderer.name.Contains("Banan_Bush")))
+                    continue;
+
+                // More Bananas заменяет эту модель, а Destroy выполняется в конце кадра
+                Transform model = renderer.transform;
+                reserved.Add(model);
+
+                Transform parent = model.parent;
+                if (parent != null && parent != landmark.transform)
+                    reserved.Add(parent);
+
+                Transform grandparent = parent != null ? parent.parent : null;
+                if (grandparent != null && grandparent != landmark.transform &&
+                    (grandparent.name.IndexOf("banana", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     grandparent.name.IndexOf("banan", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                    reserved.Add(grandparent);
+            }
+
+            return reserved;
+        }
+
+        private static bool IsMoreBananasProtected(Transform current, HashSet<Transform> reserved)
+        {
+            for (Transform parent = current; parent != null; parent = parent.parent)
+            {
+                // Деревья, созданные More Bananas, всегда обслуживаются самим модом
+                if (parent.name.StartsWith(MoreBananasTreeName, System.StringComparison.Ordinal))
+                    return true;
+
+                if (reserved != null && reserved.Contains(parent))
+                    return true;
+            }
+
+            return false;
+        }
+
         static void Prefix(Landmark __instance, bool ___initialized)
         {
             if (___initialized) return;
+
+            HashSet<Transform> moreBananasReserved = GetMoreBananasReservedTransforms(__instance);
 
             defaultLayerId = LayerMask.NameToLayer(ChoppableTreesModConstants.Layer_Default);
             treeLayerId = LayerMask.NameToLayer(ChoppableTreesModConstants.Layer_Tree);
@@ -321,6 +375,9 @@ namespace BetterTrees
 
             foreach (Transform t in __instance.GetComponentsInChildren<Transform>(true))
             {
+                if (IsMoreBananasProtected(t, moreBananasReserved))
+                    continue;
+
                 string objectNameLower = t.name.ToLower();
                 GameObject rootObject = t.gameObject;
 
@@ -368,6 +425,9 @@ namespace BetterTrees
                     }
                     if (!partOfChoppable) continue;
                 }
+
+                if (IsMoreBananasProtected(rootObject.transform, moreBananasReserved))
+                    continue;
 
                 if (rootObject.GetComponent<HarvestableTree>() != null ||
                     processedObjects.Contains(rootObject))
